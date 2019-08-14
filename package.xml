@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+    <name>Total_Web_Solutions_Payment_Gateway_Module</name>
+    <version>1.8.4</version>
+    <stability>stable</stability>
+    <license uri="http://opensource.org/licenses/gpl-license.php">GPL</license>
+    <channel>community</channel>
+    <extends/>
+    <summary>Payment module for Total Web Solutions Payment Gateway (EcomMerchant) </summary>
+    <description>Total Web Solutions offers EcomMerchant, one of the lowest priced payment gateways available in the UK. Total Web Solutions is PCI Level 1 accredited and has been providing business critical solutions to organisations of all sizes since 1995. EcomMerchant offers a customisable pay page and merchant tool for reporting, issuing refunds (full and partial) and viewing stats. Optional add-ons include Virtual Terminal, Multi-Currency, 3D Secure authentication and many others. EcomMerchant works in conjunction with an Internet Merchant Account from Barclays, HSBC or Streamline (Natwest/RBS).&#xD;
+&#xD;
+To learn more about the service visit: http://payments.totalwebsolutions.com/&#xD;
+&#xD;
+&#xD;
+Module and Installation Guide can be obtained direct from Total Web Solutions once an account has been opened.</description>
+    <notes>Payment module for Total Web Solution's gateway, now compatable with 1.8 and 1.9</notes>
+    <authors><author><name>EcomMerchant</name><user>EcomMerchant</user><email>support@totalwebsolutions.com</email></author></authors>
+    <date>2014-11-13</date>
+    <time>10:30:33</time>
+    <contents><target name="magelocal"><dir name="KuafuSoft"><dir name="EcomPayment"><dir name="Block"><dir name="Payment"><file name="Info.php" hash="33f4efd0baab7e8072c9cdda22c6019e"/></dir><dir name="Standard"><file name="Form.php" hash="86a5a2dcc1354e1cbec2658952941a40"/><file name="Redirect.php" hash="6e5898a226bf107252049fd46733a6c9"/></dir></dir><dir name="Helper"><file name="Data.php" hash="0b62c17838ed0e134643d5c3c0fe3fe6"/></dir><dir name="Model"><dir name="Api"><file name="Abstract.php" hash="b766487ac87cc06b67966ecba8201cb8"/><file name="Standard.php" hash="f92ece8d0a96c21c6ede880b8ef1dabd"/><file name="Standard.php.old" hash="24852e2b0992c8c32a449f979ce718bf"/></dir><file name="Config.php" hash="54380402c12f02a2207b2418f1577728"/><file name="Standard.php" hash="d6ddc5e714f87af581df13f9cbd1b4b6"/><file name="Status.php" hash="375570e3be74a06203f27e500e82e7be"/><dir name="sql"><dir name="ecompayment_setup"><file name="mysql4-install-0.1.0.php" hash="f84214fc43f665c79b92dc7a092b364f"/></dir></dir></dir><dir name="controllers"><file name="StandardController.php" hash="a857c2a65ce28757cba5636db3494f3b"/><file name="StandardController.phpOriginal" hash="b9db42af9c5144b1c821561d529152e5"/><file name="StandardController.phpold" hash="057e657a23a663f931da4658e777e0ce"/></dir><dir name="etc"><file name="config.xml" hash="f067280e066384785a9521066b06925e"/><file name="config.xmlOriginal" hash="e56ac6f19bc75a5bcfdcab3d5c2bb608"/><file name="system.xml" hash="910ad97aaedc4fa2aa275e88fc7c2cc0"/></dir></dir></dir></target></contents>
+    <compatible/>
+    <dependencies><required><php><min>5.1.0</min><max>6.0.0</max></php></required></dependencies>
+</package>

@@ -1,0 +1,165 @@
+<?php
+class KuafuSoft_EcomPayment_StandardController extends Mage_Core_Controller_Front_Action
+{
+    /**
+     * Order instance
+     */
+    protected $_order;
+
+    /**
+     *  Get order
+     *
+     *  @return	  Mage_Sales_Model_Order
+     */
+    public function getOrder()
+    {
+        if ($this->_order == null) {
+        }
+        return $this->_order;
+    }
+
+    /**
+     * Send expire header to ajax response
+     *
+     */
+    protected function _expireAjax()
+    {
+        if (!Mage::getSingleton('checkout/session')->getQuote()->hasItems()) {
+            $this->getResponse()->setHeader('HTTP/1.1','403 Session Expired');
+            exit;
+        }
+    }
+
+    /**
+     * When a customer chooses ecom on Checkout/Payment page
+     *
+     */
+    public function redirectAction()
+    {
+        $session = Mage::getSingleton('checkout/session');
+        $session->setEcomPaymentStandardQuoteId($session->getQuoteId());
+        $this->getResponse()->setBody($this->getLayout()->createBlock('ecompayment/standard_redirect')->toHtml());
+        $session->unsQuoteId();
+        $session->unsRedirectUrl();
+    }
+
+    /**
+     * When a customer cancel payment from ecompayment.
+     */
+    public function cancelAction()
+    {
+        $session = Mage::getSingleton('checkout/session');
+        $session->setQuoteId($session->getEcomPaymentStandardQuoteId(true));
+        if ($session->getLastRealOrderId()) {
+            $order = Mage::getModel('sales/order')->loadByIncrementId($session->getLastRealOrderId());
+            if ($order->getId()) {
+                $order->cancel()->save();
+            }
+        }
+        $this->_redirect('checkout/cart');
+    }
+    
+    /**
+     * When ecompayment fail
+     */
+    public function failAction()
+    {
+        $session = Mage::getSingleton('checkout/session');
+        if ($session->getLastRealOrderId()) {
+            $order = Mage::getModel('sales/order')->loadByIncrementId($session->getLastRealOrderId());
+// Following lines seem to duplicate items if transaction fails      
+//      if ($order->getId()) {
+            	//reimport items into cart
+//		        $cart = Mage::getSingleton('checkout/cart');
+//		        $cartTruncated = false;
+//		        /* @var $cart Mage_Checkout_Model_Cart */
+//		
+//		        $items = $order->getItemsCollection();
+//		        foreach ($items as $item) {
+//		            try {
+//		                $cart->addOrderItem($item);
+//		            } catch (Mage_Core_Exception $e){
+//		            	;
+//		            }
+//		        }
+//		        $cart->save();
+		        
+		        //cancel failed order
+                $order->cancel()->save();
+//            }
+        }
+        $session->addError(Mage::helper('ecompayment')->__('Sorry but your payment has failed. Your card details may have been entered incorrectly or the transaction may have been declined by your bank'));
+        $this->_redirect('checkout/cart');
+    }
+
+    /**
+     * when ecompayment returns
+     * The order information at this point is in POST
+     * variables.  However, you don't want to "process" the order until you
+     * get validation from the IPN.
+     */
+    public function  successAction()
+    {
+    	$status = $this->getRequest()->getParam('Status');
+    	$transId= $this->getRequest()->getParam('TransID');
+    	$amount = $this->getRequest()->getparam('Amount');
+    	$md5Check = $this->getRequest()->getParam('Crypt');
+	    $session = Mage::getSingleton('checkout/session');
+		
+    	if($md5Check == md5($status . $transId . $amount . Mage::getStoreConfig('payment/ecompayment_standard/secret_key')))
+    	{
+	        $session->setQuoteId($session->getEcomPaymentStandardQuoteId(true));
+	        Mage::getSingleton('checkout/session')->getQuote()->setIsActive(false)->save();
+	        $order = Mage::getModel('sales/order')->load($this->getRequest()->getParam('order_id'));
+	        $order->setState(Mage::getStoreConfig('payment/ecompayment_standard/order_status'), true)
+	        	->addStatusToHistory($order->getStatus(), '', false)
+	    		->save();
+			
+			$order->sendNewOrderEmail();
+				
+			if (!$order->canInvoice()) {
+				$order->addStatusHistoryComment('Magento won\'t allow invoice.', false);
+                $order->save();
+			} else {
+				
+				$orders = Mage::getModel('sales/order_invoice')->getCollection()
+				->addAttributeToFilter('order_id', array('eq'=>$order->getId()));
+				$orders->getSelect()->limit(1); 
+				 
+				if ((int)$orders->count() !== 0) {
+					$order->addStatusHistoryComment('Already invoiced.', false);
+              		$order->save();
+				} else {
+	
+					$invoice = Mage::getModel('sales/service_order', $order)->prepareInvoice();
+					
+					if (!$invoice->getTotalQty()) {
+						$order->addStatusHistoryComment('Order has no products.', false);
+               			$order->save();
+					} else {
+								
+						$invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+						$invoice->register();
+			
+						$order->addStatusHistoryComment('Automatically invoiced upon successful payment.', false);
+						
+						$transactionSave = Mage::getModel('core/resource_transaction')
+							->addObject($invoice)
+							->addObject($invoice->getOrder());
+			
+						$transactionSave->save();
+					}
+					
+				}
+			}
+
+			$this->_redirect('checkout/onepage/success', array('_secure'=>true));
+
+    	}
+    	else
+    	{
+	        $session->addError(Mage::helper('ecompayment')->__('Invalid Ecom payment request, please try again'));
+	        $this->_redirect('checkout/cart');
+    	}
+    }
+}

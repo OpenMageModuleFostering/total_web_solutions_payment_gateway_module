@@ -1,0 +1,154 @@
+<?php
+class KuafuSoft_EcomPayment_Model_Api_Standard extends KuafuSoft_EcomPayment_Model_Api_Abstract
+{
+    /**
+     * Global interface map and export filters
+     * @var array
+     */
+    protected $_globalMap = array(
+        // commands
+        'CustomerID'    => 'business_account',
+    	'CustomerEmail' => 'customer_email',
+        'TransactionCurrency' => 'currency_code',
+        'TransactionAmount'   => 'amount',
+        'Notes'         => 'notes',
+        'RedirectorSuccess'   => 'redirector_success',
+        'RedirectorFailed'    => 'redirector_failed',
+    	'PayPageType'         => 'pay_page_type',
+        'Amount'        => 'amount1',
+    );
+    protected $_exportToRequestFilters = array(
+        'amount'   => '_filterAmount',
+        'shipping' => '_filterAmount'
+    );
+
+    /**
+     * Interface for common and "aggregated order" specific fields
+     * @var array
+     */
+    protected $_commonRequestFields = array(
+        'CustomerID', 'TransactionCurrency', 'TransactionAmount', 'CustomerEmail', 'Notes', 'RedirectorSuccess', 'RedirectorFailed', 'PostCode', 'CHCountry',
+    	'PayPageType', 'Amount',
+    );
+
+   /**
+     * Fields that should be replaced in debug with '***'
+     *
+     * @var array
+     */
+    protected $_debugReplacePrivateDataKeys = array('business');
+
+    /**
+     * Address export to request map
+     * @var array
+     */
+    protected $_addressMap = array(
+        'CHCountry'    => 'country_id',
+        'PostCode'        => 'postcode',
+    );
+
+    /**
+     * Generate Ecom Standard checkout request fields
+     * Depending on whether there are cart line items set, will aggregate everything or display items specifically
+     * Shipping amount in cart line items is implemented as a separate "fake" line item
+     */
+    public function getStandardCheckoutRequest()
+    {
+        $request = $this->_exportToRequest($this->_commonRequestFields);
+        // payer address
+// not required        $this->_importAddress($request);
+        $this->_debug(array('request' => $request)); // TODO: this is not supposed to be called in getter
+        return $request;
+    }
+
+    /**
+     * Merchant account ID getter
+     * @return string
+     */
+    public function getBusinessAccount()
+    {
+        return $this->_config->customer_id;
+    }
+
+    /**
+     * Payment action getter
+     * @return string
+     */
+    public function getPaymentAction()
+    {
+        return strtolower(parent::getPaymentAction());
+    }
+
+    /**
+     * @deprecated after 1.4.1.0
+     *
+     * @param array $request
+     */
+    public function debugRequest($request)
+    {
+        return;
+    }
+
+    /**
+     * Import address object, if set, to the request
+     *
+     * @param array $request
+     */
+    protected function _importAddress(&$request)
+    {
+        $address = $this->getAddress();
+        if (!$address) {
+            return;
+        }
+        $request = Varien_Object_Mapper::accumulateByMap($address, $request, array_flip($this->_addressMap));
+    }
+    
+    public function getCurrencyCode()
+    {
+    	$code = strtoupper($this->getData('currency_code'));
+    	switch($code)
+    	{
+    		case 'AUD':
+    			return 036;
+    		case 'CAD':
+    			return 124;
+    		case 'DKK':
+    			return 208;
+    		case 'HKD':
+    			return 344;
+    		case 'ILR':
+    			return 376;
+    		case 'JPY':
+    			return 392;
+    		case 'KPW':
+    			return 578;
+    		case 'NOK':
+    			return 036;
+    		case 'GBP':
+    			return 826;
+    		case 'SAR':
+    			return 682;
+    		case 'SEK':
+    			return 752;
+    		case 'CHF':
+    			return 756;
+    		case 'USD':
+    			return 840;
+    		case 'EUR':
+    			return 978;
+    		default:
+    			Mage::throwException(Mage::helper('ecompayment')->__('Currency not supported by payment, please select another payment method.'));
+    	}
+    }
+    
+    public function getPayPageType()
+    {
+    	return 4;
+    }
+    
+    public function getAmount1()
+    {
+    	return $this->getData('amount');
+    }
+}
+
