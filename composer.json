@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/Total_Web_Solutions_Payment_Gateway_Module",
+    "name": "OpenMageModuleFostering\/Total_Web_Solutions_Payment_Gateway_Module",
     "type": "magento-module",
     "license": "GPL",
     "homepage": "",
     "description": "Payment module for Total Web Solutions Payment Gateway (EcomMerchant) ",
     "authors": [
-    {
-        "name": "EcomMerchant",
-        "email": "support@totalwebsolutions.com"
-    }
-],
+        {
+            "name": "EcomMerchant",
+            "email": "support@totalwebsolutions.com"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
