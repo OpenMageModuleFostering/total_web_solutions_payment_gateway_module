@@ -1,5 +1,5 @@
 {
-    "name": "OpenMageModuleFostering\/Total_Web_Solutions_Payment_Gateway_Module",
+    "name": "openmage-module-fostering\/total_web_solutions_payment_gateway_module",
     "type": "magento-module",
     "license": "GPL",
     "homepage": "",
